@@ -42,3 +42,13 @@ def upload_file(file: UploadFile = File(...)):
         file.file.close()
 
     return {"message": f"Successfully uploaded {file.filename}"}
+
+@app.get("/files")
+def list_files():
+    try:
+        response = s3.list_objects_v2(Bucket="my-fastapi-uploader-12345", Prefix="uploadedFiles/")
+        files = [item['Key'].replace("uploadedFiles/", "") for item in response.get('Contents', [])]
+        return {"files": files}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
